@@ -9,33 +9,39 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Toast
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import java.text.FieldPosition
 
 class NoteEditFragment : Fragment(), View.OnClickListener {
 
-    companion object {  // тут лежит всё статическое
+    companion object {
         private const val ARGS_NAME = "args_name"
+        private const val NOTE_ID_EXTRA = "HABIT_ID_EXTRA"
+        private const val IS_NEW_NOTE_EXTRA = "IS_NEW_HABIT_EXTRA"
 
-        // для создания нового экземпляра фрагмента
-        fun newInstance(name: String) : NoteEditFragment {
+        fun newInstance(name: String, noteId: Int? = null, isNewNote: Boolean=true) : NoteEditFragment {
             val fragment = NoteEditFragment()
             val bundle = Bundle()
             bundle.putString(name, ARGS_NAME)
+            bundle.putBoolean(IS_NEW_NOTE_EXTRA, isNewNote)
+            if (!isNewNote && noteId != null) {
+                bundle.putInt(NOTE_ID_EXTRA, noteId)
+            }
             fragment.arguments = bundle
             return fragment
         }
     }
 
-    var layout: View? = null        // сохраняем макет, чтобы можно было в нем искать элементы
-    var callback: NoteEditFragment.NoteEditor? = null   // чтобы общаться с Activity сохраняем её как экземпляр интерфейса с методоми для общения
+    var layout: View? = null
+    var callback: NoteEditFragment.NoteEditor? = null
 
-    override fun onAttach(context: Context) {   // метод жизненного цикла, вызывается, когда фрагмент связывается с Activity
+    override fun onAttach(context: Context) {
         super.onAttach(context)
-        callback = activity as NoteEditFragment.NoteEditor      // сохраняем активность, чтобы работать с методами активности, указанными в интерфесе внизу класса
+        callback = activity as NoteEditFragment.NoteEditor
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {             // метод жизненного цикла
-        layout =  inflater.inflate(
+                              savedInstanceState: Bundle?): View? {
+        layout = inflater.inflate(
             R.layout.fragment_note_edit,
             container,
             false
@@ -44,7 +50,20 @@ class NoteEditFragment : Fragment(), View.OnClickListener {
         val fab = layout!!.findViewById<FloatingActionButton>(R.id.fab_done)
         fab.setOnClickListener(this)
 
+        if (!arguments?.getBoolean(IS_NEW_NOTE_EXTRA)!!) {
+            arguments?.getInt(NOTE_ID_EXTRA)?.let { loadNote(it) }
+        }
+
         return layout
+    }
+
+    private fun loadNote(position: Int) {
+        val note = Notes.notes[position]
+        val name = layout!!.findViewById<EditText>(R.id.note_name)
+        name.setText(note.name)
+
+        val description = layout!!.findViewById<EditText>(R.id.note_description)
+        description.setText(note.description)
     }
 
     override fun onClick(v: View?) {
@@ -63,9 +82,21 @@ class NoteEditFragment : Fragment(), View.OnClickListener {
         }
         val description = layout?.findViewById<EditText>(R.id.note_description)?.text.toString()
 
-        Notes.notes.add(
-            Note(name, description)
-        )
+        // добавляем в список заметок
+//        Notes.notes.add(
+//            Note(name, description)
+//        )
+
+        val note = Note(name, description)
+        if (!arguments?.getBoolean(IS_NEW_NOTE_EXTRA)!!) {
+            arguments?.getInt(NOTE_ID_EXTRA)?.let {
+                Notes.notes.removeAt(it)
+                Notes.notes.add(it, note)
+            }
+        }
+        else {
+            Notes.notes.add(note)
+        }
 
         showToast("Note saved")
 
@@ -74,7 +105,6 @@ class NoteEditFragment : Fragment(), View.OnClickListener {
 
 
     private fun showToast(message: String) {
-        // создание подсказки
         val toast = Toast.makeText(
             activity,
             message,
@@ -82,7 +112,6 @@ class NoteEditFragment : Fragment(), View.OnClickListener {
         )
         toast.show()
     }
-
 
     interface NoteEditor {
         fun onClickNoteDone()
