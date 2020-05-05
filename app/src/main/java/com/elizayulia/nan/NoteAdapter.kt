@@ -9,6 +9,12 @@ import com.google.android.material.card.MaterialCardView
 class NoteAdapter(private val notes: MutableList<Note>)
     : RecyclerView.Adapter<NoteAdapter.NoteViewHolder>(){
 
+    lateinit var listener: Listener
+
+    interface Listener {
+        fun onClick(position: Int)
+    }
+
     class NoteViewHolder(val cardView: MaterialCardView) : RecyclerView.ViewHolder(cardView)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteViewHolder {
@@ -22,6 +28,8 @@ class NoteAdapter(private val notes: MutableList<Note>)
         noteName.text = notes[position].name
         val noteDescription = holder.cardView.findViewById<TextView>(R.id.note_description)
         noteDescription.text = notes[position].description
+
+        holder.cardView.setOnClickListener { listener.onClick(position) }
     }
 
     override fun getItemCount(): Int = notes.size
