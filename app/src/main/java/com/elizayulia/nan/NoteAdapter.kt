@@ -6,6 +6,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
 
+// адаптер для RecyclerView, чтобы он мог отображать наши данные
 class NoteAdapter(private val notes: MutableList<Note>)
     : RecyclerView.Adapter<NoteAdapter.NoteViewHolder>(){
 

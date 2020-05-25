@@ -6,6 +6,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.FragmentActivity
+import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.Lifecycle
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 
@@ -27,32 +29,20 @@ class MainFragment : Fragment() {
         }
     }
 
+    var layout: View? = null
+    var viewPager: ViewPager2? = null
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
-        val layout = inflater.inflate(
+        layout = inflater.inflate(
             R.layout.fragment_main,
             container,
             false
         )
 
-        val viewPager = layout!!.findViewById<View>(R.id.pager) as ViewPager2
-//        viewPager.adapter = activity?.let { MainFragment.CustomPagerAdapter(it) }
-        viewPager.adapter = CustomPagerAdapter(this)
-
         return layout
     }
 
-    private class CustomPagerAdapter(fragment: Fragment) : FragmentStateAdapter(fragment) {
 
-        override fun createFragment(position: Int): Fragment {
-            return when(position) {
-                0 -> NotesFragment.newInstance("notes")
-                1 -> NotificationFragment.newInstance("notifications")
-                else -> NotificationFragment.newInstance("notifications")
-            }
-        }
-
-        override fun getItemCount(): Int = 2
-    }
 }
